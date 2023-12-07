@@ -1,3 +1,5 @@
+import childProcess from 'child_process'
+
 export function splitChars(str: string) {
   return str.split('')
 }
@@ -29,9 +31,7 @@ export function parseNumbersFromStr(str: string) {
 export function createArray<TData>(length: number, mapper: (index: number) => TData): TData[]
 export function createArray<TData>(length: number, data: TData): TData[]
 export function createArray<TData>(length: number, mapperOrData: unknown) {
-  return Array.from({ length }, (_, index) =>
-    typeof mapperOrData === 'function' ? mapperOrData(index) : mapperOrData
-  )
+  return Array.from({ length }, (_, index) => (typeof mapperOrData === 'function' ? mapperOrData(index) : mapperOrData))
 }
 
 export function repeat(callback: (index: number) => void, times: number) {
@@ -41,8 +41,7 @@ export function repeat(callback: (index: number) => void, times: number) {
   }
 }
 
-export const exists = <Value>(value: Value | undefined | null): value is Value =>
-  value !== undefined && value !== null
+export const exists = <Value>(value: Value | undefined | null): value is Value => value !== undefined && value !== null
 
 export const uniq = <TData>(value: TData[]) => Array.from(new Set(value))
 
@@ -87,10 +86,7 @@ export const omit = <TData extends Record<string, unknown>, TOmittedKey extends 
   return copy
 }
 
-export function hasOwnProperty<T, K extends PropertyKey>(
-  obj: T,
-  prop: K
-): obj is T & Record<K, unknown> {
+export function hasOwnProperty<T, K extends PropertyKey>(obj: T, prop: K): obj is T & Record<K, unknown> {
   return Object.prototype.hasOwnProperty.call(obj, prop)
 }
 
@@ -132,4 +128,19 @@ export function sum(...vals: number[]) {
 
 export function multiply(...vals: number[]) {
   return vals.reduce((total, item) => total * item)
+}
+
+export function toClipboard(data: any) {
+  var proc = childProcess.spawn('pbcopy')
+  proc.stdin.write(JSON.stringify(data))
+  proc.stdin.end()
+}
+
+export function result(part: number, value: number, expected?: number) {
+  if (expected == null || value === expected) {
+    console.log(`\nPart ${part}`, value, '\n')
+    toClipboard(value)
+  } else {
+    console.error(`Not correct, expected ${expected}, but got ${value}`)
+  }
 }

@@ -1,3 +1,5 @@
+import nerdamer from 'nerdamer'
+import 'nerdamer/Solve'
 import { multiply, parseNumber, parseNumbersFromStr } from '../../shared/utils'
 
 export const solver: Solver = (inputStr) => {
@@ -31,6 +33,10 @@ export const solver: Solver = (inputStr) => {
 
   console.timeEnd('Part 2')
   console.log(part2)
+
+  console.log(nerdamer('x^3+1').solveFor('x'))
+
+  nerdamer(`solve(x*(x-${game[0]})>=${game[1]}), x`)
 }
 
 type Game = [time: number, distance: number]
