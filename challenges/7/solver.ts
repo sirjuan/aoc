@@ -25,64 +25,38 @@ function solve(inputStr: string, types: Array<string | number>, offset: number) 
 }
 
 function getMultiplierWithJokers(cards: number[]) {
-  const cardCounts = getCardCounts(cards.filter((card) => card !== 1))
-  const countArray = Object.values(cardCounts).sort((a, b) => b - a)
-  const max = Math.max(...countArray)
-  const min = Math.min(...countArray)
-
+  const countArray = getCardCounts(cards.filter((card) => card !== 1))
   const jokerCount = cards.filter((card) => card === 1).length
 
-  const FIVE_OF_A_KIND = 6
-  const FOUR_OF_A_KIND = 5
-  const FULL_HOUSE = 4
-  const THREE_OF_A_KIND = 3
-  const TWO_PAIR = 2
-  const ONE_PAIR = 1
-  const HIGH_CARD = 0
+  countArray[0] ??= 0
+  countArray[0] += jokerCount
 
-  const jokerHandlers = [ONE_PAIR, THREE_OF_A_KIND, FOUR_OF_A_KIND, FIVE_OF_A_KIND]
+  const max = countArray[0]
 
-  if (max === 5) {
-    return FIVE_OF_A_KIND
+  if (max > 3) {
+    return max + 1
   }
 
-  if (max === 4) {
-    return jokerHandlers[jokerCount + 2] ?? FOUR_OF_A_KIND
-  }
-
-  if (max === 3 && min === 2) {
-    return FULL_HOUSE
+  if (countArray.length === 2) {
+    return 4
   }
 
   if (max === 3) {
-    return jokerHandlers[jokerCount + 1] ?? ONE_PAIR
-  }
-  if (countArray.filter((val) => val === 2).length === 2) {
-    if (jokerCount > 0) {
-      return FULL_HOUSE
-    }
-    return TWO_PAIR
+    return max
   }
 
-  if (max === 2) {
-    return jokerHandlers[jokerCount] ?? ONE_PAIR
+  if (countArray.length === 3) {
+    return 2
   }
 
-  if (jokerCount === 0) {
-    return HIGH_CARD
-  }
-
-  return jokerCount >= 4 ? FIVE_OF_A_KIND : jokerHandlers[jokerCount - 1]
+  return max - 1
 }
 
 function getCardCounts(cards: number[]) {
   const counts: Record<string, number> = {}
   cards.forEach((card) => {
-    if (counts[card]) {
-      counts[card]++
-    } else {
-      counts[card] = 1
-    }
+    counts[card] ??= 0
+    counts[card]++
   })
-  return counts
+  return Object.values(counts).sort((a, b) => b - a)
 }
