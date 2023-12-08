@@ -144,3 +144,24 @@ export function result(part: number, value: number, expected?: number) {
     console.error(`Not correct, expected ${expected}, but got ${value}`)
   }
 }
+
+export function leastCommonMultiple(a: number, b: number): number {
+  return (a * b) / greatestCommonDivisor(a, b)
+}
+
+export function greatestCommonDivisor(a: number, b: number): number {
+  return !b ? a : greatestCommonDivisor(b, a % b)
+}
+
+export const circularArray = <TData>(arr: TData[]) => {
+  return {
+    index: 0,
+    next() {
+      const item = arr[this.index]
+      this.index++
+      if (this.index >= arr.length) this.index = 0
+      return item
+    },
+    length: arr.length,
+  }
+}

@@ -15,8 +15,15 @@ async function run() {
   const isExample = typeof arg === 'string'
   const inputFile = ['input', arg].filter(Boolean).join('_') + '.txt'
   const input = fs.readFileSync(path.join(dir, inputFile)).toString('utf-8')
-  const { solver, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
-  solver(parser(input), isExample)
+  const { solver, solver1, solver2, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
+  const parsedInput = parser(input)
+  const solvers = [solver, solver1, solver2].filter((s) => typeof s === 'function')
+  solvers.forEach((s, index) => {
+    const msg = solvers.length > 0 ? `Part ${index + 1}` : 'Solution'
+    console.time(msg)
+    s(parsedInput, isExample)
+    console.timeEnd(msg)
+  })
 }
 
 function copyFileSync(source: string, target: string) {
