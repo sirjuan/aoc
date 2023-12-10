@@ -69,25 +69,25 @@ export const solver2: Solver = (inputStr) => {
     })
     .map((line) => line.flatMap((line) => line.join('').split('')))
 
-  const queue2 = [{ y: 0, x: 0 }]
+  const queue = [{ y: 0, x: 0 }]
 
   const low = -1
   const maxY = zoomedGrid.length
   const maxX = zoomedGrid[0].length
-  const visited2 = new Set<string>()
+  const visited = new Set<string>()
 
   // Flood fill
-  while (queue2.length > 0) {
-    const coord = queue2.pop()
+  while (queue.length > 0) {
+    const coord = queue.pop()
     const { x, y } = coord
 
     const item = zoomedGrid[y]?.[x]
 
-    if (visited2.has(`${x},${y}`)) {
+    if (visited.has(`${x},${y}`)) {
       continue
     }
 
-    visited2.add(`${x},${y}`)
+    visited.add(`${x},${y}`)
 
     // Check the boundary condition
     if (x < low || x > maxX || y < low || y > maxY) {
@@ -102,7 +102,7 @@ export const solver2: Solver = (inputStr) => {
       zoomedGrid[y][x] = 'x'
     }
 
-    queue2.push({ x: x + 1, y }, { x: x - 1, y }, { x, y: y + 1 }, { x, y: y - 1 })
+    queue.push({ x: x + 1, y }, { x: x - 1, y }, { x, y: y + 1 }, { x, y: y - 1 })
   }
 
   const shrinked = []
