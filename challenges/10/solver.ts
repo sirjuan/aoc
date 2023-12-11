@@ -44,14 +44,14 @@ export const solver2: Solver = (inputStr) => {
   const [loopGrid] = getLoopMap(inputStr)
 
   const zoomMapper = {
-    [bottomLeft]: `.|.\n.L-\n...`,
-    [bottomRight]: `.|.\n-J.\n...`,
-    [topRight]: `...\n-7.\n.|.`,
-    [topLeft]: `...\n.F-\n.|.`,
-    [horizontal]: `...\n---\n...`,
-    [vertical]: `.|.\n.|.\n.|.`,
-    [start]: `SSS\nSSS\nSSS`,
-    '.': `...\n...\n...`,
+    [bottomLeft]: `.|\n.L`,
+    [bottomRight]: `.|\n-J`,
+    [topRight]: `..\n-7`,
+    [topLeft]: `..\n.F`,
+    [horizontal]: `..\n--`,
+    [vertical]: `.|\n.|`,
+    [start]: `SS\nSS`,
+    '.': `..\n..`,
   }
 
   const zoomedGrid = loopGrid
@@ -64,7 +64,7 @@ export const solver2: Solver = (inputStr) => {
           })
           return acc
         },
-        [[], [], []]
+        [[], []]
       )
     })
     .map((line) => line.flatMap((line) => line.join('').split('')))
@@ -108,10 +108,10 @@ export const solver2: Solver = (inputStr) => {
   const shrinked = []
 
   zoomedGrid.forEach((line, y) => {
-    if (y % 3 !== 1) {
+    if (y % 2 === 0) {
       return
     }
-    shrinked.push(line.filter((_, x) => x % 3 === 1))
+    shrinked.push(line.filter((_, x) => x % 2 !== 0))
   })
 
   const mapped = shrinked.map((line) => line.join('')).join('\n')

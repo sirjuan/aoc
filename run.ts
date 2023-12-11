@@ -12,8 +12,9 @@ async function run() {
   if (!fs.existsSync(dir)) {
     copyTemplate(dir, await getInput(day))
   }
-  const isExample = typeof arg === 'string'
-  const inputFile = ['input', arg].filter(Boolean).join('_') + '.txt'
+  const isDay = typeof argDay === 'number'
+  const isExample = !isDay && typeof arg === 'string'
+  const inputFile = ['input', isDay ? null : arg].filter(Boolean).join('_') + '.txt'
   const input = fs.readFileSync(path.join(dir, inputFile)).toString('utf-8')
   const { solver, solver1, solver2, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
   const parsedInput = parser(input)
