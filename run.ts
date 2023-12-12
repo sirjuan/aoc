@@ -12,7 +12,7 @@ async function run() {
   if (!fs.existsSync(dir)) {
     copyTemplate(dir, await getInput(day))
   }
-  const isDay = typeof argDay === 'number'
+  const isDay = !Number.isNaN(argDay)
   const isExample = !isDay && typeof arg === 'string'
   const inputFile = ['input', isDay ? null : arg].filter(Boolean).join('_') + '.txt'
   const input = fs.readFileSync(path.join(dir, inputFile)).toString('utf-8')
