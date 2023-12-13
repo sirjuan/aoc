@@ -1,4 +1,5 @@
 import childProcess from 'child_process'
+import 'colors'
 
 export function splitChars(str: string) {
   return str.split('')
@@ -138,10 +139,10 @@ export function toClipboard(data: any) {
 
 export function result(part: number, value: number, expected?: number) {
   if (expected == null || value === expected) {
-    console.log(`\nPart ${part}`, value, '\n')
+    console.log(`\nPart ${part}`.green, value, '\n')
     toClipboard(value)
   } else {
-    console.error(`Not correct, expected ${expected}, but got ${value}`)
+    console.error('Incorrect!'.bgRed, 'Expected', expected, 'but got', value)
   }
 }
 
