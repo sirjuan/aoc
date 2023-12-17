@@ -7,8 +7,28 @@ const directions = ['N', 'S', 'E', 'W'] as const
 
 export const solver: Solver = (inputStr) => {
   const grid = createGrid(inputStr)
-  const coord: Coord = [0, 0]
-  const queue: { coord: Coord; direction: Direction }[] = [{ coord, direction: 'E' }]
+
+  result(1, getEnergized(grid, [0, 0], 'E'), 7608)
+
+  const results: number[] = []
+
+  let grid2 = grid
+
+  for (let y = 0; y < grid.length; y++) {
+    results.push(getEnergized(grid2, [0, y], 'E'))
+    results.push(getEnergized(grid2, [grid2[y].length - 1, y], 'W'))
+  }
+
+  for (let x = 0; x < grid[0].length; x++) {
+    results.push(getEnergized(grid2, [x, 0], 'S'))
+    results.push(getEnergized(grid2, [x, grid2.length - 1], 'N'))
+  }
+
+  result(2, Math.max(...results))
+}
+
+function getEnergized(grid: Grid, coord: Coord, direction: Direction) {
+  const queue: { coord: Coord; direction: Direction }[] = [{ coord, direction }]
   const state = new Set<string>([stringifyCoordWithDirection(coord, 'E')])
 
   while (queue.length) {
@@ -57,84 +77,34 @@ export const solver: Solver = (inputStr) => {
     }
   }
 
-  // ######....
-  // .#...#....
-  // .#...#####
-  // .#...##...
-  // .#...##...
-  // .#...##...
-  // .#..####..
-  // ########..
-  // .#######..
-  // .#...#.#..
-
-  // ######....
-  // .#...#....
-  // .#...#####
-  // .#...##...
-  // .#...##...
-  // .#...##...
-  // .#..####..
-  // ########..
-  // .#######..
-  // .#...#.#..
-
-  console.log(state.size)
-
   const coordSet = new Set<string>()
   for (const coord of state) {
     coordSet.add(coord.split(' ')[0])
   }
 
-  console.log(
-    grid.map((row, y) => row.map((char, x) => (coordSet.has(stringifyCoord([x, y])) ? '#' : '.')).join('')).join('\n')
-  )
-
-  console.log(coordSet.size)
-
-  // Solution
-
-  result(1, coordSet.size, 7608)
+  return coordSet.size
 }
 
-// This is default and not needed if you don't need some custom parsing
-// export const parser: Parser = (inputStr) => inputStr.trim()
-
 type Coord = readonly [x: number, y: number]
+type Grid = GridItem[][]
+type Direction = (typeof directions)[number]
+type Mirror = (typeof mirrors)[number]
+type DeflectionMirror = (typeof deflectionMirrors)[number]
+type SplitMirror = (typeof splitMirrors)[number]
+type Empty = '.'
+type GridItem = Mirror | Empty
+
 function createGrid(input: string) {
   const grid = input.split('\n').map((row) => row.replace(/[\\\\]/g, '\\').split(/\s*/))
   return grid as Grid
-}
-
-type Grid = GridItem[][]
-
-function stringifyGrid(grid: Grid) {
-  return grid.map((row) => row.join('')).join('\n')
 }
 
 function get(grid: Grid, [x, y]: Coord) {
   return grid[y]?.[x]
 }
 
-function set(grid: Grid, [x, y]: Coord, value: GridItem) {
-  grid[y][x] = value
-}
-
-function stringifyCoord([x, y]: Coord) {
-  return `${x},${y}`
-}
-
 function stringifyCoordWithDirection([x, y]: Coord, direction: Direction) {
   return `${x},${y} ${direction}`
-}
-
-function getAdjacent(grid: Grid, [x, y]: Coord) {
-  const adjacents: string[] = []
-  if (grid[y - 1]?.[x]) adjacents.push(grid[y - 1][x])
-  if (grid[y + 1]?.[x]) adjacents.push(grid[y + 1][x])
-  if (grid[y]?.[x - 1]) adjacents.push(grid[y][x - 1])
-  if (grid[y]?.[x + 1]) adjacents.push(grid[y][x + 1])
-  return adjacents
 }
 
 function handleDeflectionMirror(mirror: DeflectionMirror, direction: Direction): Direction {
@@ -205,13 +175,6 @@ function directionToCoord(direction: string) {
   }
 }
 
-type Direction = (typeof directions)[number]
-type Mirror = (typeof mirrors)[number]
-type DeflectionMirror = (typeof deflectionMirrors)[number]
-type SplitMirror = (typeof splitMirrors)[number]
-type Empty = '.'
-type GridItem = Mirror | Empty
-
 function isEmpty(item: GridItem): item is Empty {
   return item === '.'
 }
@@ -222,23 +185,4 @@ function isDeflectionMirror(item: GridItem): item is DeflectionMirror {
 
 function isSplitMirror(item: GridItem): item is SplitMirror {
   return splitMirrors.includes(item as SplitMirror)
-}
-
-function getAdjacentCoords(grid: Grid, [x, y]: Coord) {
-  const adjacents: Coord[] = []
-  if (grid[y - 1]?.[x]) adjacents.push([x, y - 1])
-  if (grid[y + 1]?.[x]) adjacents.push([x, y + 1])
-  if (grid[y]?.[x - 1]) adjacents.push([x - 1, y])
-  if (grid[y]?.[x + 1]) adjacents.push([x + 1, y])
-  return adjacents
-}
-
-function getAdjacentCoordsWithDirection(grid: Grid, [x, y]: Coord): Record<Direction, Coord> {
-  const adjacents: Record<Direction, Coord> = {
-    N: [x, y - 1],
-    S: [x, y + 1],
-    E: [x + 1, y],
-    W: [x - 1, y],
-  }
-  return adjacents
 }
