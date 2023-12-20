@@ -143,6 +143,7 @@ export function result(part: number, value: number, expected?: number) {
     toClipboard(value)
   } else {
     console.error('Incorrect!'.bgRed, 'Expected', expected, 'but got', value)
+    console.error('Diff:', expected - value)
   }
 }
 
