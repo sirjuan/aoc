@@ -26,7 +26,7 @@ export function parseNumberFromStr(str: string) {
 }
 
 export function parseNumbersFromStr(str: string) {
-  return Array.from(str.matchAll(/\d+/g)).map((match) => parseNumber(match[0]))
+  return Array.from(str.matchAll(/(-)?\d+/g)).map((match) => parseNumber(match[0]))
 }
 
 export function createArray<TData>(length: number, mapper: (index: number) => TData): TData[]
