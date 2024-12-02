@@ -10,7 +10,7 @@ async function run() {
   const day = isNaN(argDay) ? new Date().getDate() : argDay
   const dir = relativePath('challenges', day.toString())
   if (!fs.existsSync(dir)) {
-    copyTemplate(dir, await getInput(day))
+    copyTemplate(dir, await fetchInput(day))
   }
   const isDay = !Number.isNaN(argDay)
   const isExample = !isDay && typeof arg === 'string'
@@ -19,6 +19,7 @@ async function run() {
   const { solver, solver1, solver2, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
   const parsedInput = parser(input)
   const solvers = [solver, solver1, solver2].filter((s) => typeof s === 'function')
+
   solvers.forEach((s, index) => {
     const msg = solvers.length > 0 ? `Part ${index + 1}` : 'Solution'
     console.time(msg)
@@ -48,13 +49,13 @@ async function copyTemplate(dir: string, data: string) {
   fs.writeFileSync(relativePath('.', dir, 'input.txt'), data)
 }
 
-async function getInput(day: number) {
+async function fetchInput(day: number) {
   const session = process.env.SESSION
   if (!session) {
     throw new Error('Missing session')
   }
   const cookie = `session=${session}`
-  const url = `https://adventofcode.com/2023/day/${day}/input`
+  const url = `https://adventofcode.com/${process.env.YEAR}/day/${day}/input`
   const response = await fetch(url, { headers: { cookie } })
   return response.text()
 }

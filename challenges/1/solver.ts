@@ -1,40 +1,29 @@
+import { parseNumber, result } from '../../shared/utils'
+
 export const solver: Solver = (inputStr) => {
-  // Solution part 1
+  const lefts: number[] = []
+  const rights: number[] = []
+  const counts: Record<number, number> = {}
 
-  const part1 = inputStr
-    .split('\n')
-    .map((line) => line.match(/\d/g))
-    .map((match) => parseInt(match[0] + match.at(-1), 10))
-    .reduce((a, b) => a + b, 0)
+  inputStr.split('\n').forEach((line) => {
+    const [left, right] = line.split('   ').map(parseNumber)
+    lefts.push(left)
+    rights.push(right)
+    counts[right] ??= 0
+    counts[right]++
+  })
 
-  // Solution part 2
+  lefts.sort((a, b) => a - b)
+  rights.sort((a, b) => a - b)
 
-  const characters = [
-    'zero',
-    'one',
-    'two',
-    'three',
-    'four',
-    'five',
-    'six',
-    'seven',
-    'eight',
-    'nine',
-  ]
+  let part1 = 0
+  let part2 = 0
 
-  const map = Object.fromEntries(
-    characters.flatMap((key, index) => [
-      [key, index.toString()],
-      [index, index.toString()],
-    ])
-  )
+  lefts.forEach((left, index) => {
+    part1 += Math.abs(left - rights[index])
+    part2 += left * (counts[left] ?? 0)
+  })
 
-  const keys = Object.keys(map).join('|')
-  const regex = new RegExp(`(?=(${keys}))`, 'g')
-
-  const part2 = inputStr
-    .split('\n')
-    .map((line) => Array.from(line.matchAll(regex)).map((x) => map[x[1]]))
-    .map((match) => parseInt(match[0] + match.at(-1)), 10)
-    .reduce((a, b) => a + b, 0)
+  result(1, part1)
+  result(2, part2)
 }

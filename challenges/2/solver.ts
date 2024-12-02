@@ -1,59 +1,59 @@
-import {
-  multiply,
-  parseNumber,
-  parseNumberFromStr,
-  splitLines,
-  splitList,
-  splitWords,
-  sum,
-} from '../../shared/utils'
+import { parseNumber, result } from '../../shared/utils'
 
-export const solver: Solver = (inputStr) => {
-  const games = splitLines(inputStr)
-  const colors = ['red', 'green', 'blue']
+function isSafe(numbers: number[]) {
+  let safe = true
 
-  // Solution part 1
+  let type: 'decreasing' | 'increasing'
 
-  const maxes = Object.fromEntries(colors.map((color, index) => [color, 12 + index]))
+  for (const [index, number] of numbers.entries()) {
+    if (index === 0) {
+      continue
+    }
 
-  const part1 = sum(
-    ...games.map((game) => {
-      const [gameNumber, gameRules] = game.split(': ')
+    const prev = numbers[index - 1]
 
-      for (const bag of gameRules.split('; ')) {
-        for (const cubes of splitList(bag)) {
-          const [qtStr, color] = splitWords(cubes)
-          const quantity = parseNumber(qtStr)
+    if (type == null) {
+      type = prev < number ? 'increasing' : 'decreasing'
+    }
 
-          if (quantity > maxes[color]) {
-            return 0
-          }
-        }
+    if ((type === 'increasing' && prev >= number) || (type === 'decreasing' && prev <= number)) {
+      safe = false
+      break
+    }
+
+    const diff = Math.abs(prev - number)
+    if (diff < 1 || diff > 3) {
+      safe = false
+      break
+    }
+  }
+
+  return safe
+}
+
+export const solver1: Solver = (inputStr) => {
+  const res = inputStr.split('\n').reduce((acc, line) => {
+    const numbers = line.split(' ').map(parseNumber)
+    return isSafe(numbers) ? acc + 1 : acc
+  }, 0)
+
+  result(1, res)
+}
+
+export const solver2: Solver = (inputStr) => {
+  const res = inputStr.split('\n').reduce((acc, line) => {
+    const numbers = line.split(' ').map(parseNumber)
+    if (isSafe(numbers)) {
+      return acc + 1
+    }
+
+    for (let i = 0; i < numbers.length; i++) {
+      if (isSafe(numbers.toSpliced(i, 1))) {
+        return acc + 1
       }
+    }
+    return acc
+  }, 0)
 
-      return parseNumberFromStr(gameNumber)
-    })
-  )
-
-  console.log(part1)
-
-  // Solution part 2
-
-  const part2 = sum(
-    ...games.map((game) => {
-      const counts = Object.fromEntries(colors.map((color) => [color, 0]))
-
-      for (const bag of game.split(': ')[1].split('; ')) {
-        for (const cubes of splitList(bag)) {
-          const [qtStr, color] = splitWords(cubes)
-          const quantity = parseNumber(qtStr)
-          counts[color] = Math.max(counts[color], quantity)
-        }
-      }
-
-      return multiply(...Object.values(counts))
-    })
-  )
-
-  console.log(part2)
+  result(2, res)
 }
