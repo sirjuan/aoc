@@ -181,3 +181,76 @@ export function memo<Args extends unknown[], Result>(func: (...args: Args) => Re
     return result
   }
 }
+
+export function transposeArray(array: string[][]) {
+  var newArray = []
+  const arrayLength = array[0].length
+
+  for (var i = 0; i < array.length; i++) {
+    for (var j = 0; j < arrayLength; j++) {
+      const item = array[i][j]
+      if (item != null) {
+        newArray[j] ??= []
+        newArray[j].push(item)
+      }
+    }
+  }
+
+  return newArray
+}
+
+export function rotateMatrix45deg<T>(
+  matrix: T[][],
+  direction: 'clockwise' | 'counterClockwise',
+  padCharacter: any = null
+): T[][] {
+  var summax = matrix.length + matrix[0].length - 1
+  var rotated: T[][] = []
+  for (var i = 0; i < summax; ++i) {
+    rotated.push([])
+  }
+  if (direction === 'clockwise') {
+    for (var j = 0; j < matrix[0].length; ++j) {
+      for (var i = 0; i < matrix.length; ++i) {
+        rotated[i + j].push(matrix[i][j])
+      }
+    }
+  } else {
+    for (var i = 0; i < matrix.length; ++i) {
+      for (var j = 0; j < matrix[0].length; ++j) {
+        rotated[j - i + matrix.length - 1].push(matrix[i][j])
+      }
+    }
+  }
+
+  // Pad the empty parts with the provided character on both sides
+  for (var i = 0; i < rotated.length; ++i) {
+    while (rotated[i].length < matrix.length) {
+      rotated[i].unshift(padCharacter)
+      if (rotated[i].length < matrix.length) {
+        rotated[i].push(padCharacter)
+      }
+    }
+  }
+
+  return rotated
+}
+
+export function parseMap(inputStr: string, callback?: (char: string, x: number, y: number) => void) {
+  const horizontalLines: string[] = []
+  const verticalLines: string[] = []
+  const map: string[][] = []
+
+  inputStr.split('\n').forEach((line, y) => {
+    map.push([])
+    horizontalLines.push(line)
+    line.split('').forEach((char, x) => {
+      verticalLines[x] ??= ''
+      verticalLines[x] += char
+      map[y].push(char)
+      callback?.(char, x, y)
+    })
+  })
+
+  return { horizontalLines, verticalLines, map }
+}

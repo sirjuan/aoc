@@ -1,4 +1,4 @@
-import { result, sum } from '../../shared/utils'
+import { result, sum, transposeArray } from '../../shared/utils'
 
 export const solver1: Solver = (inputStr) => {
   const maps = inputStr.split('\n\n')
@@ -11,8 +11,6 @@ export const solver2: Solver = (inputStr) => {
 }
 
 function calculate(mapStr: string, allowedDiff: number) {
-  const verticalMap = []
-
   const map = mapStr.split('\n').map((row) => row.split(''))
 
   let foundX = findReflection(map, allowedDiff)
@@ -77,21 +75,4 @@ function diffArray(a: string[], b: string[]): number {
 
 function diffString(a: string, b: string): number {
   return diffArray(a.split(''), b.split(''))
-}
-
-function transposeArray(array: string[][]) {
-  var newArray = []
-  const arrayLength = array[0].length
-
-  for (var i = 0; i < array.length; i++) {
-    for (var j = 0; j < arrayLength; j++) {
-      const item = array[i][j]
-      if (item != null) {
-        newArray[j] ??= []
-        newArray[j].push(item)
-      }
-    }
-  }
-
-  return newArray
 }
