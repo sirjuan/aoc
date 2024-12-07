@@ -254,3 +254,11 @@ export function parseMap(inputStr: string, callback?: (char: string, x: number, 
 
   return { horizontalLines, verticalLines, map }
 }
+
+export function concatenateNumbers(a: number, b: number): number {
+  let multiplier = 1
+  while (multiplier <= b) {
+    multiplier *= 10
+  }
+  return a * multiplier + b
+}

@@ -1,56 +1,67 @@
-import { parseNumber, result, sum } from '../../shared/utils'
+import { concatenateNumbers, parseNumber, result } from '../../shared/utils'
 
 export const solver: Solver = (inputStr) => {
   const equations = parseEquations(inputStr)
-  result(1, solve(equations))
+  const part1 = solve(equations)
+  result(1, part1)
   result(2, solve(equations, true))
 }
 
-function solve(equations: Equation[], concat = false) {
-  const corrects: number[] = []
+const foundIndices = new Set<number>()
 
-  equations.forEach(({ result, values }, index) => {
+function solve(equations: Equation[], part2 = false) {
+  console.log('equations', equations.length)
+  let res = 0
+
+  equations.slice().forEach(({ result, values }, index) => {
+    if (foundIndices.has(index)) {
+      res += result
+      return
+    }
+
     const states: number[][] = [[values[0]]]
 
     let round = 1
 
     while (round <= values.length) {
-      const lastRound = states.at(-1)
+      const lastRound = states.pop()
       const newRound: number[] = []
       states.push(newRound)
 
       for (const state of lastRound) {
         if (round === values.length) {
           if (state === result) {
-            corrects.push(result)
+            res += result
+            foundIndices.add(index)
             break
           }
         }
 
         const value = values[round]
 
-        const added = state + value
-        if (added <= result) {
-          newRound.push(added)
-        }
-
         const multiplied = state * value
         if (multiplied <= result) {
           newRound.push(multiplied)
         }
 
-        if (concat) {
-          const concatenated = Number(`${state}${value}`)
+        const added = state + value
+        if (added <= result) {
+          newRound.push(added)
+        }
+
+        if (part2) {
+          const concatenated = concatenateNumbers(state, value)
           if (concatenated <= result) {
             newRound.push(concatenated)
           }
+        } else {
         }
       }
       round++
     }
   })
 
-  return sum(...corrects)
+  return res
 }
 
 type Equation = { result: number; values: number[] }
@@ -62,6 +73,3 @@ function parseEquations(inputStr: string) {
     return { result: parseNumber(resultStr), values }
   })
 }
-
-// This is default and not needed if you don't need some custom parsing
-// export const parser: Parser = (inputStr) => inputStr.trim()
