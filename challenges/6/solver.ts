@@ -1,60 +1,65 @@
-import { map } from 'lodash'
-import { parseMap, parseNumber, result, uniq } from '../../shared/utils'
+import { parseMap, result, uniq } from '../../shared/utils'
 
-type Direction = 'up' | 'down' | 'left' | 'right'
-type Position = [x: number, y: number]
+type Dir = 'up' | 'down' | 'left' | 'right'
+type Pos = [x: number, y: number]
+type PosDir = [x: number, y: number, direction: Dir]
 
 export const solver: Solver = (inputStr) => {
   const { map, startPosition } = getMap(inputStr)
-  const [visited] = detectLoop(map, startPosition)
-  result(1, visited.length)
+  const start: PosDir = [...startPosition, 'up']
+  const path = solve(map, [start])[0]
 
-  const part2 = visited.slice(1).reduce((acc, pos) => {
-    const [x, y] = pos.split(',').map(parseNumber)
-    const original = map[y][x]
-    if (original === '#') {
-      return acc
+  result(1, uniq(path.map(stringifyCoords)).length)
+
+  let infiniteLoops = 0
+  const visited = new Set<string>()
+
+  path.forEach((step, index) => {
+    const stringigied = stringifyCoords(step)
+    if (index === 0 || visited.has(stringigied) || getItem(map, step) === '#') {
+      return
     }
-    map[y][x] = '#'
-    const [, loop] = detectLoop(map, startPosition)
-    map[y][x] = original
-    return acc + (loop ? 1 : 0)
+    visited.add(stringigied)
+
+    if (solve(map, path.slice(0, index), stringigied)[1]) {
+      infiniteLoops++
+    }
   }, 0)
-  result(2, part2)
+
+  result(2, infiniteLoops)
 }
 
-function detectLoop(map: string[][], startPosition: Position): [string[], boolean] {
-  let currentDirection: Direction = 'up'
-  const visited = new Set<string>([stringify(startPosition, currentDirection)])
-  const visitedPositions: Position[] = [startPosition]
+function solve(map: string[][], history: PosDir[], extraBlock?: string): [PosDir[], boolean] {
+  const visited = new Set<string>(history.map(stringify))
+  const visitedPositions: PosDir[] = history.slice()
+  let dir: Dir = history.at(-1)[2]
 
   while (true) {
-    const currentPos = visitedPositions.at(-1)
-    const nextPos = move(currentDirection, currentPos)
+    const nextPos = move(dir, visitedPositions.at(-1))
     const nextItem = getItem(map, nextPos)
+    const entry: PosDir = [...nextPos, dir]
+    const stringified = stringify(entry)
 
-    const coord = stringify(nextPos, currentDirection)
-
-    if (visited.has(coord)) {
-      return [uniq(visitedPositions.map((pos) => pos.join(','))), true]
+    if (visited.has(stringified)) {
+      return [visitedPositions, true]
     }
 
     if (nextItem == null) {
-      return [uniq(visitedPositions.map((pos) => pos.join(','))), false]
+      return [visitedPositions, false]
     }
 
-    if (nextItem === '#') {
-      currentDirection = changeDirectionClockwise(currentDirection)
+    if (nextItem === '#' || extraBlock === stringify(nextPos)) {
+      dir = turnRight(dir)
       continue
     }
 
-    visitedPositions.push(nextPos)
-    visited.add(coord)
+    visitedPositions.push(entry)
+    visited.add(stringified)
   }
 }
 
 function getMap(inputStr: string) {
-  let startPosition: Position = [0, 0]
+  let startPosition: Pos = [0, 0]
 
   const { map } = parseMap(inputStr, (char, x, y) => {
     if (char === '^') {
@@ -65,7 +70,7 @@ function getMap(inputStr: string) {
   return { map, startPosition }
 }
 
-function move(direction: Direction, currentPos: Position): Position {
+function move(direction: Dir, currentPos: Pos | PosDir): Pos {
   switch (direction) {
     case 'up':
       return [currentPos[0], currentPos[1] - 1]
@@ -78,7 +83,7 @@ function move(direction: Direction, currentPos: Position): Position {
   }
 }
 
-function changeDirectionClockwise(direction: Direction): Direction {
+function turnRight(direction: Dir): Dir {
   switch (direction) {
     case 'up':
       return 'right'
@@ -91,10 +96,18 @@ function changeDirectionClockwise(direction: Direction): Direction {
   }
 }
 
-function stringify(pos: Position, direction: Direction): string {
-  return [...pos, direction].join(',')
+function stringify(pos: Array<number | string>): string {
+  return pos.join(',')
 }
 
-function getItem(map: string[][], pos: [number, number]): string | null {
+function stringifyCoords(pos: PosDir): string {
+  return pos.slice(0, 2).join(',')
+}
+
+function getItem(map: string[][], pos: PosDir | Pos): string | null {
   return map[pos[1]]?.[pos[0]] ?? null
+}
+
+function setItem(map: string[][], pos: PosDir | Pos, value: string) {
+  map[pos[1]][pos[0]] = value
 }
