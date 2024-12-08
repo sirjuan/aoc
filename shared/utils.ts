@@ -252,7 +252,15 @@ export function parseMap(inputStr: string, callback?: (char: string, x: number, 
     })
   })
 
-  return { horizontalLines, verticalLines, map }
+  function getItem([x, y]: [x: number, y: number]) {
+    return map[y]?.[x]
+  }
+
+  function setItem([x, y]: [x: number, y: number], value: string) {
+    map[y][x] = value
+  }
+
+  return { horizontalLines, verticalLines, map, getItem, setItem }
 }
 
 export function concatenateNumbers(a: number, b: number): number {

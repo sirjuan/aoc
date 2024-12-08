@@ -8,7 +8,7 @@ export const solver: Solver = (inputStr) => {
 function solve(inputStr: string, part2 = false) {
   const antennaPositions: Record<string, Pos[]> = {}
 
-  const { map } = parseMap(inputStr, (char, x, y) => {
+  const map = parseMap(inputStr, (char, x, y) => {
     if (char !== '.') {
       antennaPositions[char] ??= []
       antennaPositions[char].push([x, y])
@@ -17,7 +17,7 @@ function solve(inputStr: string, part2 = false) {
 
   const positionSet = new Set<string>()
 
-  Object.values(antennaPositions).forEach((positions, i) => {
+  Object.values(antennaPositions).forEach((positions) => {
     while (positions.length > 0) {
       const current = positions.pop()
       for (const pos of positions) {
@@ -33,11 +33,11 @@ function solve(inputStr: string, part2 = false) {
 
         let i = 1
         while (true) {
-          const first = [x1 + xDiff * i, y1 + yDiff * i]
-          const second = [x2 - xDiff * i, y2 - yDiff * i]
+          const first: Pos = [x1 + xDiff * i, y1 + yDiff * i]
+          const second: Pos = [x2 - xDiff * i, y2 - yDiff * i]
 
-          const firstItem = map[first[1]]?.[first[0]]
-          const secondItem = map[second[1]]?.[second[0]]
+          const firstItem = map.getItem(first)
+          const secondItem = map.getItem(second)
 
           if (firstItem == null && secondItem == null) {
             break
