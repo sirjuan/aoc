@@ -236,31 +236,53 @@ export function rotateMatrix45deg<T>(
   return rotated
 }
 
-export function parseMap(inputStr: string, callback?: (char: string, x: number, y: number) => void) {
+type ParserOpts<T> = {
+  iterator?: (char: T, x: number, y: number) => void
+  parser?: (char: string) => T
+}
+
+export function parseMap<T = string>(inputStr: string, { iterator, parser = (char) => char as T }: ParserOpts<T> = {}) {
   const horizontalLines: string[] = []
   const verticalLines: string[] = []
-  const map: string[][] = []
+  const map: T[][] = []
 
   inputStr.split('\n').forEach((line, y) => {
     map.push([])
     horizontalLines.push(line)
     line.split('').forEach((char, x) => {
+      const parsed = parser(char)
       verticalLines[x] ??= ''
-      verticalLines[x] += char
-      map[y].push(char)
-      callback?.(char, x, y)
+      verticalLines[x] += parsed
+      map[y].push(parsed)
+      iterator?.(parsed, x, y)
     })
   })
 
-  function getItem([x, y]: [x: number, y: number]) {
+  function getItem([x, y]: [x: number, y: number]): T {
     return map[y]?.[x]
   }
 
-  function setItem([x, y]: [x: number, y: number], value: string) {
+  function setItem([x, y]: [x: number, y: number], value: T) {
     map[y][x] = value
   }
 
-  return { horizontalLines, verticalLines, map, getItem, setItem }
+  function moveLeft([x, y]: [x: number, y: number]): [x: number, y: number] {
+    return [x - 1, y]
+  }
+
+  function moveRight([x, y]: [x: number, y: number]): [x: number, y: number] {
+    return [x + 1, y]
+  }
+
+  function moveUp([x, y]: [x: number, y: number]): [x: number, y: number] {
+    return [x, y - 1]
+  }
+
+  function moveDown([x, y]: [x: number, y: number]): [x: number, y: number] {
+    return [x, y + 1]
+  }
+
+  return { horizontalLines, verticalLines, map, getItem, setItem, moveLeft, moveRight, moveUp, moveDown }
 }
 
 export function concatenateNumbers(a: number, b: number): number {

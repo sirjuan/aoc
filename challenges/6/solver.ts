@@ -61,10 +61,12 @@ function solve(map: string[][], history: PosDir[], extraBlock?: string): [PosDir
 function getMap(inputStr: string) {
   let startPosition: Pos = [0, 0]
 
-  const { map } = parseMap(inputStr, (char, x, y) => {
-    if (char === '^') {
-      startPosition = [x, y]
-    }
+  const { map } = parseMap(inputStr, {
+    iterator: (char, x, y) => {
+      if (char === '^') {
+        startPosition = [x, y]
+      }
+    },
   })
 
   return { map, startPosition }

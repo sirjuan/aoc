@@ -13,10 +13,12 @@ export const solver1: Solver = (inputStr) => {
 export const solver2: Solver = (inputStr) => {
   const aPositions: [x: number, y: number][] = []
 
-  const { map } = parseMap(inputStr, (char, x, y) => {
-    if (char === 'A') {
-      aPositions.push([x, y])
-    }
+  const { map } = parseMap(inputStr, {
+    iterator: (char, x, y) => {
+      if (char === 'A') {
+        aPositions.push([x, y])
+      }
+    },
   })
 
   const res = aPositions.reduce((acc, [x, y]) => {

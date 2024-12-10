@@ -8,11 +8,13 @@ export const solver: Solver = (inputStr) => {
 function solve(inputStr: string, part2 = false) {
   const antennaPositions: Record<string, Pos[]> = {}
 
-  const map = parseMap(inputStr, (char, x, y) => {
-    if (char !== '.') {
-      antennaPositions[char] ??= []
-      antennaPositions[char].push([x, y])
-    }
+  const map = parseMap(inputStr, {
+    iterator: (char, x, y) => {
+      if (char !== '.') {
+        antennaPositions[char] ??= []
+        antennaPositions[char].push([x, y])
+      }
+    },
   })
 
   const positionSet = new Set<string>()
