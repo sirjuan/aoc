@@ -258,8 +258,19 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     })
   })
 
+  const height = map.length
+  const width = map[0].length
+
   function getItem([x, y]: [x: number, y: number]): T {
     return map[y]?.[x]
+  }
+
+  function checkItem([x, y]: [x: number, y: number], val: T): boolean {
+    return map[y]?.[x] === val
+  }
+
+  function inBounds([x, y]: [x: number, y: number]): boolean {
+    return x >= 0 && y >= 0 && y < height && x < width
   }
 
   function setItem([x, y]: [x: number, y: number], value: T) {
@@ -282,7 +293,19 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     return [x, y + 1]
   }
 
-  return { horizontalLines, verticalLines, map, getItem, setItem, moveLeft, moveRight, moveUp, moveDown }
+  return {
+    horizontalLines,
+    verticalLines,
+    map,
+    getItem,
+    setItem,
+    moveLeft,
+    moveRight,
+    moveUp,
+    moveDown,
+    checkItem,
+    inBounds,
+  }
 }
 
 export function concatenateNumbers(a: number, b: number): number {

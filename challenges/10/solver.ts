@@ -5,7 +5,7 @@ type Pos = [x: number, y: number]
 export const solver: Solver = (inputStr) => {
   const trailHeads: Pos[] = []
 
-  const { moveDown, moveUp, moveRight, moveLeft, getItem } = parseMap(inputStr, {
+  const { moveDown, moveUp, moveRight, moveLeft, checkItem } = parseMap(inputStr, {
     parser: parseNumber,
     iterator: (char, x, y) => {
       if (char === 0) {
@@ -14,12 +14,11 @@ export const solver: Solver = (inputStr) => {
     },
   })
 
-  const scores: number[] = []
-  const ratings: number[] = []
+  let part1 = 0
+  let part2 = 0
 
   trailHeads.forEach((head) => {
-    const targets = new Set<string>()
-    let rating = 0
+    const targets: string[] = []
 
     const queue = [{ coord: head, elevation: 0 }]
 
@@ -29,22 +28,20 @@ export const solver: Solver = (inputStr) => {
       const moves = [moveLeft(item.coord), moveRight(item.coord), moveUp(item.coord), moveDown(item.coord)]
 
       for (const coord of moves) {
-        const elevation = getItem(coord)
-        if (elevation === nextElevation) {
-          if (elevation === 9) {
-            rating++
-            targets.add(coord.join(','))
-            continue
+        if (checkItem(coord, nextElevation)) {
+          if (nextElevation === 9) {
+            targets.push(coord.join(','))
+          } else {
+            queue.push({ coord: coord, elevation: nextElevation })
           }
-          queue.push({ coord: coord, elevation: nextElevation })
         }
       }
     }
 
-    ratings.push(rating)
-    scores.push(targets.size)
+    part1 += new Set(targets).size
+    part2 += targets.length
   })
 
-  result(1, sum(...scores))
-  result(2, sum(...ratings))
+  result(1, part1)
+  result(2, part2)
 }
