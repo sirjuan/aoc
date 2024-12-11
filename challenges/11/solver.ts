@@ -6,27 +6,23 @@ export const solver = (inputStr: string) => {
 }
 
 function solve(inputStr: string, blinks: number) {
-  let stonesRecord: Record<string, number> = Object.fromEntries(inputStr.split(' ').map((stone) => [stone, 1]))
+  let stones = Object.fromEntries(inputStr.split(' ').map((stone) => [stone, 1]))
 
   repeat(() => {
-    const stoneRec: Record<string, number> = {}
-    for (const [stone, count] of Object.entries(stonesRecord)) {
-      const replaceMents = replace(stone)
-      for (const replacement of replaceMents) {
-        if (stoneRec[replacement]) {
-          stoneRec[replacement] += count
-        } else {
-          stoneRec[replacement] = count
-        }
+    const newStones = {}
+    for (const [stone, count] of Object.entries(stones)) {
+      for (const replacement of getReplacements(stone)) {
+        newStones[replacement] ??= 0
+        newStones[replacement] += count
       }
     }
-    stonesRecord = stoneRec
+    stones = newStones
   }, blinks)
 
-  return sum(...Object.values(stonesRecord))
+  return sum(...Object.values(stones))
 }
 
-function replace(stone: string): string[] {
+function getReplacements(stone: string): string[] {
   if (parseNumber(stone) === 0) {
     return ['1']
   }
