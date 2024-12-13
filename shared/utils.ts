@@ -305,6 +305,7 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     moveDown,
     checkItem,
     inBounds,
+    stringifyCoord: coordToString,
   }
 }
 
@@ -314,4 +315,8 @@ export function concatenateNumbers(a: number, b: number): number {
     multiplier *= 10
   }
   return a * multiplier + b
+}
+
+export function coordToString([x, y]: [x: number, y: number]) {
+  return `${x},${y}`
 }
