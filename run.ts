@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import 'dotenv/config'
+import { setExample } from './shared/utils'
 
 await run()
 
@@ -19,6 +20,10 @@ async function run() {
   const { solver, solver1, solver2, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
   const parsedInput = parser(input)
   const solvers = [solver, solver1, solver2].filter((s) => typeof s === 'function')
+
+  if (isExample) {
+    setExample()
+  }
 
   solvers.forEach((s, index) => {
     const msg = solvers.length > 0 ? `Part ${index + 1}` : 'Solution'

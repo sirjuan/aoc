@@ -320,3 +320,10 @@ export function concatenateNumbers(a: number, b: number): number {
 export function coordToString([x, y]: [x: number, y: number]) {
   return `${x},${y}`
 }
+
+export let isExample = false
+
+export function setExample() {
+  console.log('setting example')
+  isExample = true
+}
