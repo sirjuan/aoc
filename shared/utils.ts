@@ -293,6 +293,18 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     return [x, y + 1]
   }
 
+  function getLine(y: number): T[] {
+    return map[y]
+  }
+
+  function iterate(callback: (item: T, x: number, y: number) => void) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        callback(getItem([x, y]), x, y)
+      }
+    }
+  }
+
   return {
     horizontalLines,
     verticalLines,
@@ -306,6 +318,10 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     checkItem,
     inBounds,
     stringifyCoord: coordToString,
+    iterate,
+    getLine,
+    height,
+    width,
   }
 }
 
