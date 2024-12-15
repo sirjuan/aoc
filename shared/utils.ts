@@ -241,6 +241,13 @@ type ParserOpts<T> = {
   parser?: (char: string) => T
 }
 
+export const mapUtils = {
+  moveLeft: ([x, y]: [x: number, y: number]): [x: number, y: number] => [x - 1, y],
+  moveRight: ([x, y]: [x: number, y: number]): [x: number, y: number] => [x + 1, y],
+  moveUp: ([x, y]: [x: number, y: number]): [x: number, y: number] => [x, y - 1],
+  moveDown: ([x, y]: [x: number, y: number]): [x: number, y: number] => [x, y + 1],
+}
+
 export function parseMap<T = string>(inputStr: string, { iterator, parser = (char) => char as T }: ParserOpts<T> = {}) {
   const horizontalLines: string[] = []
   const verticalLines: string[] = []
@@ -277,22 +284,6 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     map[y][x] = value
   }
 
-  function moveLeft([x, y]: [x: number, y: number]): [x: number, y: number] {
-    return [x - 1, y]
-  }
-
-  function moveRight([x, y]: [x: number, y: number]): [x: number, y: number] {
-    return [x + 1, y]
-  }
-
-  function moveUp([x, y]: [x: number, y: number]): [x: number, y: number] {
-    return [x, y - 1]
-  }
-
-  function moveDown([x, y]: [x: number, y: number]): [x: number, y: number] {
-    return [x, y + 1]
-  }
-
   function getLine(y: number): T[] {
     return map[y]
   }
@@ -306,15 +297,12 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
   }
 
   return {
+    ...mapUtils,
     horizontalLines,
     verticalLines,
     map,
     getItem,
     setItem,
-    moveLeft,
-    moveRight,
-    moveUp,
-    moveDown,
     checkItem,
     inBounds,
     stringifyCoord: coordToString,

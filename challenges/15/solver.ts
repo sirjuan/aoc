@@ -1,75 +1,75 @@
-import { parseMap, result, sum } from '../../shared/utils'
+import { mapUtils, parseMap, result, sum } from '../../shared/utils'
 
 type Position = [x: number, y: number]
-type Direction = '>' | '<' | '^' | 'v'
+type Direction = keyof typeof moves
 
 export const solver1: Solver = (inputStr) => {
-  let position = 0
-  const boxes = new Set<number>()
+  result(1, solve(inputStr, 1))
+  result(2, solve(inputStr, 2))
+}
+
+function solve(inputStr: string, factor: number) {
+  let currentPosition = 0
+  const boxes: Box[] = []
   const walls = new Set<number>()
-  const [mapStr, instructionStr] = inputStr.split('\n\n')
-  const map = parseMap(mapStr, {
+  const [mapStr, instructions] = inputStr.split('\n\n')
+  parseMap(mapStr, {
     iterator: (char, x, y) => {
+      const position = getCoordNumber([x * factor, y])
+      const doubledPosition = factor === 2 ? getCoordNumber([x * factor + 1, y]) : null
+      const positions = [position, doubledPosition].filter((c) => c !== null)
       if (char === '@') {
-        position = getCoordNumber([x, y])
+        currentPosition = position
       } else if (char === 'O') {
-        boxes.add(getCoordNumber([x, y]))
+        boxes.push(new Box(...positions))
       } else if (char === '#') {
-        walls.add(getCoordNumber([x, y]))
+        positions.forEach((c) => walls.add(c))
       }
     },
   })
 
-  const moves = {
-    '>': map.moveRight,
-    '<': map.moveLeft,
-    '^': map.moveUp,
-    v: map.moveDown,
-  }
-
-  const moveTypes = new Set(Object.keys(moves))
-
-  type Direction = keyof typeof moves
-
-  function move(direction: Direction, position: number) {
-    return getCoordNumber(moves[direction](parseCoordNumber(position)))
-  }
-
-  for (const char of instructionStr.trim()) {
-    if (!moveTypes.has(char)) {
-      continue
-    }
-    const direction = char as Direction
-    const maybeNextPosition = move(direction, position)
-    if (walls.has(maybeNextPosition)) {
+  instructions: for (const direction of instructions) {
+    if (!isDirection(direction)) {
       continue
     }
 
-    if (boxes.has(maybeNextPosition)) {
-      let canMove = true
-      let pos = maybeNextPosition
-      while (true) {
-        if (walls.has(pos)) {
-          canMove = false
-          break
-        } else if (boxes.has(pos)) {
-          pos = move(direction, pos)
-          continue
-        } else {
-          break
-        }
-      }
-      if (!canMove) {
+    const nextPosition = move(direction, currentPosition)
+
+    if (walls.has(nextPosition)) {
+      continue
+    }
+
+    const overlappingBoxes = boxes.filter((box) => box.isOnPosition(nextPosition))
+
+    if (overlappingBoxes.length === 0) {
+      currentPosition = nextPosition
+      continue
+    }
+
+    const movableBoxes = new Set<Box>()
+
+    while (overlappingBoxes.length > 0) {
+      const box = overlappingBoxes.shift()!
+      if (movableBoxes.has(box)) {
         continue
       }
-      boxes.delete(maybeNextPosition)
-      boxes.add(pos)
+      movableBoxes.add(box)
+
+      const nextPositions = box.getPushPositions(direction)
+
+      if (nextPositions.some((pos) => walls.has(pos))) {
+        // Can't push the box
+        continue instructions
+      }
+
+      overlappingBoxes.push(...boxes.filter((box) => nextPositions.some((pos) => box.isOnPosition(pos))))
     }
 
-    position = maybeNextPosition
+    movableBoxes.forEach((box) => box.push(direction))
+    currentPosition = nextPosition
   }
 
-  result(1, sum(...Array.from(boxes)))
+  return sum(...boxes.map((box) => box.positions[0]))
 }
 
 class Box {
@@ -104,78 +104,21 @@ class Box {
   }
 }
 
-export const solver2: Solver = (inputStr) => {
-  let position = 0
-  const boxes: Box[] = []
-  const walls = new Set<number>()
-  const [mapStr, instructionStr] = inputStr.split('\n\n')
-  const map = parseMap(mapStr, {
-    iterator: (char, x, y) => {
-      if (char === '@') {
-        position = getCoordNumber([x * 2, y])
-      } else if (char === 'O') {
-        boxes.push(new Box(getCoordNumber([x * 2, y]), getCoordNumber([x * 2 + 1, y])))
-      } else if (char === '#') {
-        walls.add(getCoordNumber([x * 2, y]))
-        walls.add(getCoordNumber([x * 2 + 1, y]))
-      }
-    },
-  })
+const moves = {
+  '>': mapUtils.moveRight,
+  '<': mapUtils.moveLeft,
+  '^': mapUtils.moveUp,
+  v: mapUtils.moveDown,
+}
 
-  const moves = {
-    '>': map.moveRight,
-    '<': map.moveLeft,
-    '^': map.moveUp,
-    v: map.moveDown,
-  }
+const moveTypes = new Set(Object.keys(moves))
 
-  const moveTypes = new Set(Object.keys(moves))
+function isDirection(char: string): char is Direction {
+  return moveTypes.has(char)
+}
 
-  function move(direction: Direction, position: number) {
-    return getCoordNumber(moves[direction](parseCoordNumber(position)))
-  }
-
-  instructions: for (const char of instructionStr) {
-    if (!moveTypes.has(char)) {
-      continue
-    }
-    const direction = char as Direction
-    const maybeNextPosition = move(direction, position)
-    if (walls.has(maybeNextPosition)) {
-      continue
-    }
-
-    const boxesOnPosition = boxes.filter((box) => box.isOnPosition(maybeNextPosition))
-
-    if (boxesOnPosition.length === 0) {
-      position = maybeNextPosition
-      continue
-    }
-
-    const movableBoxes = new Set<Box>()
-    const queue = boxesOnPosition.slice()
-
-    while (queue.length > 0) {
-      const box = queue.shift()!
-      if (movableBoxes.has(box)) {
-        continue
-      }
-      movableBoxes.add(box)
-      const nextPositions = box.getPushPositions(direction)
-
-      if (nextPositions.some((pos) => walls.has(pos))) {
-        continue instructions
-      }
-
-      const nextBoxes = boxes.filter((box) => nextPositions.some((pos) => box.isOnPosition(pos)))
-      queue.push(...nextBoxes)
-    }
-
-    movableBoxes.forEach((box) => box.push(direction))
-    position = maybeNextPosition
-  }
-
-  result(2, sum(...boxes.map((box) => box.positions[0])))
+function move(direction: Direction, position: number) {
+  return getCoordNumber(moves[direction](parseCoordNumber(position)))
 }
 
 function getCoordNumber([x, y]: Position): number {
