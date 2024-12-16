@@ -2,20 +2,19 @@ import { shortestPath } from '../../shared/shortestPath'
 import { parseMap, parseNumber, result } from '../../shared/utils'
 
 type Direction = 'N' | 'E' | 'S' | 'W'
-type Position = `${number},${number}-${Direction}`
 type Coord = [number, number]
 
 export const solver: Solver = (inputStr) => {
-  let initial: Position
+  let initial: string
   let endPosition = ''
   const map = parseMap(inputStr, {
     iterator: (char, x, y) => {
       if (char === 'S') {
-        initial = `${x},${y}-E`
+        initial = stringify([x, y], 'E')
         return '.'
       }
       if (char === 'E') {
-        endPosition = `${x},${y}`
+        endPosition = stringify([x, y])
         return '.'
       }
     },
@@ -25,25 +24,20 @@ export const solver: Solver = (inputStr) => {
     initial,
     isTarget: (node) => endPosition === node.split('-')[0],
     edges: (node: string): [string, number][] => {
-      const [pos, dir] = node.split('-')
-      const direction = dir as Direction
-      const [x, y] = pos.split(',').map(parseNumber)
+      const [coord, direction] = parse(node)
+      const delta = getDelta(direction)
+      const next = addCoords(coord, delta)
       const edges = []
 
-      const [dx, dy] = getDelta(direction)
-      const next: Coord = [x + dx, y + dy]
-
       if (map.getItem(next) === '.') {
-        const nextPos: Position = `${next[0]},${next[1]}-${direction}`
-        edges.push([nextPos, 1])
+        edges.push([stringify(next, direction), 1])
       }
 
-      getTurns(direction).forEach((turn) => {
-        const [dx, dy] = getDelta(turn)
-        if (map.getItem([x + dx, y + dy]) === '.') {
-          edges.push([`${x},${y}-${turn}`, 1000])
+      for (const [delta, turn] of getTurnsWithDelta(direction)) {
+        if (map.getItem(addCoords(coord, delta)) === '.') {
+          edges.push([stringify(coord, turn), 1000])
         }
-      })
+      }
 
       return edges
     },
@@ -77,11 +71,30 @@ function getTurns(direction: Direction): [Direction, Direction] {
   }
 }
 
-function getDelta(direction: Direction) {
-  return {
-    N: [0, -1],
-    E: [1, 0],
-    S: [0, 1],
-    W: [-1, 0],
-  }[direction as Direction]
+function getDelta(direction: Direction): Coord {
+  return (
+    {
+      N: [0, -1],
+      E: [1, 0],
+      S: [0, 1],
+      W: [-1, 0],
+    } satisfies Record<Direction, Coord>
+  )[direction as Direction]
+}
+
+function getTurnsWithDelta(direction: Direction): [Coord, Direction][] {
+  return getTurns(direction).map((turn) => [getDelta(turn), turn])
+}
+
+function addCoords(a: Coord, b: Coord): Coord {
+  return [a[0] + b[0], a[1] + b[1]]
+}
+
+function stringify(coord: Coord, direction?: Direction): string {
+  return [coord.join(','), direction].filter(Boolean).join('-')
+}
+
+function parse(node: string): [Coord, Direction] {
+  const [pos, dir] = node.split('-')
+  return [pos.split(',').map(parseNumber) as Coord, dir as Direction]
 }
