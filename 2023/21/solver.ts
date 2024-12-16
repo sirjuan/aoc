@@ -1,5 +1,4 @@
 import { result } from '../../shared/utils'
-import numeric from 'numeric'
 
 export const solver: Solver = (inputStr) => {
   const startingPoint: Coord = [0, 0]
@@ -74,8 +73,6 @@ export const solver: Solver = (inputStr) => {
 
     currentStep++
   }
-
-  // pythonToJs(inputStr)
 
   const maybe = 161412551529951
 

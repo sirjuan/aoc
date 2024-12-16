@@ -2,20 +2,27 @@ import fs from 'fs'
 import path from 'path'
 import 'dotenv/config'
 import { setExample } from './shared/utils'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+import { filter } from 'lodash'
 
 await run()
 
 async function run() {
-  const arg = process.argv[2]
-  const argDay = parseInt(arg, 10)
-  const day = isNaN(argDay) ? new Date().getDate() : argDay
-  const dir = relativePath('challenges', day.toString())
+  const args = yargs(hideBin(process.argv)).parse()
+
+  const currentYear = new Date().getFullYear()
+  const year = args.year == null ? currentYear : args.year
+  const day = args.day == null ? new Date().getDate() : args.day
+  const command = args._[0]
+
+  const yearPart = year === currentYear ? 'challenges' : year.toString()
+  const dir = relativePath(yearPart, day.toString())
   if (!fs.existsSync(dir)) {
-    copyTemplate(dir, await fetchInput(day))
+    copyTemplate(dir, await fetchInput(day, year))
   }
-  const isDay = !Number.isNaN(argDay)
-  const isExample = !isDay && typeof arg === 'string'
-  const inputFile = ['input', isDay ? null : arg].filter(Boolean).join('_') + '.txt'
+  const isExample = command?.startsWith('example') ?? false
+  const inputFile = ['input', command].filter(Boolean).join('_') + '.txt'
   const input = fs.readFileSync(path.join(dir, inputFile)).toString('utf-8')
   const { solver, solver1, solver2, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
   const parsedInput = parser(input)
@@ -54,13 +61,13 @@ async function copyTemplate(dir: string, data: string) {
   fs.writeFileSync(relativePath('.', dir, 'input.txt'), data)
 }
 
-async function fetchInput(day: number) {
+async function fetchInput(day: number, year: number) {
   const session = process.env.SESSION
   if (!session) {
     throw new Error('Missing session')
   }
   const cookie = `session=${session}`
-  const url = `https://adventofcode.com/${process.env.YEAR}/day/${day}/input`
+  const url = `https://adventofcode.com/${year}/day/${day}/input`
   const response = await fetch(url, { headers: { cookie } })
   return response.text()
 }

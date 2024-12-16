@@ -1,4 +1,5 @@
 .vscode
 node_modules
 .env
-**/input.txt
+**/input.*
+**/.DS_Store
