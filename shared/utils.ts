@@ -237,7 +237,7 @@ export function rotateMatrix45deg<T>(
 }
 
 type ParserOpts<T> = {
-  iterator?: (char: T, x: number, y: number) => void
+  iterator?: ((char: T, x: number, y: number) => void) | ((char: T, x: number, y: number) => T)
   parser?: (char: string) => T
 }
 
@@ -258,10 +258,11 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     horizontalLines.push(line)
     line.split('').forEach((char, x) => {
       const parsed = parser(char)
+      const iterated = iterator?.(parsed, x, y)
+      const item = (iterated ?? parsed) as T
       verticalLines[x] ??= ''
-      verticalLines[x] += parsed
-      map[y].push(parsed)
-      iterator?.(parsed, x, y)
+      verticalLines[x] += item
+      map[y].push(item)
     })
   })
 

@@ -77,4 +77,8 @@ export class PriorityQueue<T> {
       node = maxChild
     }
   }
+
+  slice(start = 0, end = this.size()) {
+    return (this.heap = this.heap.slice(start, end))
+  }
 }
