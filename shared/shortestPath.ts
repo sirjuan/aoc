@@ -1,52 +1,62 @@
 import { PriorityQueue } from './queue'
 
+interface PathNode<T> {
+  point: T
+  previous: PathNode<T> | null
+  distance: number
+}
+
 export function shortestPath<T>({
   initial,
   isTarget,
   edges,
+  multiple = false,
 }: {
   initial: T
   isTarget: (node: T) => boolean
   edges: (node: T) => [T, number][]
-}): T[] | null {
-  interface PathNode<T> {
-    point: T
-    previous: PathNode<T> | null
-    distance: number
-  }
-
+  multiple?: boolean
+}): PathNode<T>[] {
   const init: PathNode<T> = { point: initial, previous: null, distance: 0 }
   const nodes = new Map<T, PathNode<T>>()
   nodes.set(initial, init)
   const queue = new PriorityQueue({ initial: [init], comparator: (a, b) => a.distance - b.distance })
-  const targets = new Set<T>()
+  const targets = new Set<PathNode<T>>()
+  let target = Infinity
 
-  while (!queue.isEmpty()) {
-    const previous = queue.pop()
+  main: while (!queue.isEmpty()) {
+    const current = queue.pop()
 
-    for (const [point, distance] of edges(previous.point)) {
-      if (isTarget(point)) {
-        targets.add(point)
+    for (const [point, distance] of edges(current.point)) {
+      const newDistance = current.distance + distance
+
+      if (newDistance > target) {
+        continue
       }
 
-      const newDistance = previous.distance + distance
-      if (!nodes.has(point) || newDistance < previous.distance) {
-        const newNode: PathNode<T> = { point, previous, distance: newDistance }
+      const newNode: PathNode<T> = { point, previous: current, distance: newDistance }
+      if (isTarget(point)) {
+        if (newDistance > target) {
+          break main
+        }
+        targets.add(newNode)
+        if (!multiple) {
+          break main
+        }
+        nodes.set(point, newNode)
+        target = newDistance
+      }
+
+      const existing = nodes.get(point)
+
+      if (!existing || newDistance <= existing.distance) {
         nodes.set(point, newNode)
         queue.push(newNode)
       }
     }
   }
 
-  const targetNode = [...targets].map(nodes.get).sort((a, b) => a.distance - b.distance)[0]
-  if (targetNode != null) {
-    const result = []
-    let node: PathNode<T> | null = targetNode
-    while (node?.previous != null) {
-      result.push(node.point)
-      node = node.previous
-    }
-    return result.reverse()
-  }
-  return null
+  console.log('target', target)
+
+  return [...targets].filter((node) => node.distance === target)
 }
