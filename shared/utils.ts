@@ -137,13 +137,15 @@ export function toClipboard(data: any) {
   proc.stdin.end()
 }
 
-export function result(part: number, value: number, expected?: number) {
+export function result<T extends number | string>(part: number, value: T, expected?: T) {
   if (expected == null || value === expected) {
     console.log(`\nPart ${part}`.green, value, '\n')
     toClipboard(value)
   } else {
     console.error('Incorrect!'.bgRed, 'Expected', expected, 'but got', value)
-    console.error('Diff:', expected - value)
+    if (typeof expected === 'number' && typeof value === 'number') {
+      console.error('Diff:', expected - value)
+    }
   }
 }
 
