@@ -331,6 +331,5 @@ export function coordToString([x, y]: [x: number, y: number]) {
 export let isExample = false
 
 export function setExample() {
-  console.log('setting example')
   isExample = true
 }

@@ -22,15 +22,16 @@ async function run() {
     copyTemplate(dir, await fetchInput(day, year))
   }
   const isExample = command?.startsWith('example') ?? false
+
+  if (isExample) {
+    setExample()
+  }
+
   const inputFile = ['input', command].filter(Boolean).join('_') + '.txt'
   const input = fs.readFileSync(path.join(dir, inputFile)).toString('utf-8')
   const { solver, solver1, solver2, parser = defaultParser } = await import(relativePath(dir, 'solver.ts'))
   const parsedInput = parser(input)
   const solvers = [solver, solver1, solver2].filter((s) => typeof s === 'function')
-
-  if (isExample) {
-    setExample()
-  }
 
   solvers.forEach((s, index) => {
     const msg = solvers.length > 0 ? `Part ${index + 1}` : 'Solution'
