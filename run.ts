@@ -4,7 +4,6 @@ import 'dotenv/config'
 import { setExample } from './shared/utils'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { filter } from 'lodash'
 
 await run()
 

@@ -78,12 +78,10 @@ export function shortestPath<T>({
   initial,
   isTarget,
   edges,
-  multiple = false,
 }: {
   initial: T
   isTarget: (node: PathNode<T>) => boolean
   edges: (node: PathNode<T>) => [T, number][]
-  multiple?: boolean
 }): PathNode<T>[] {
   const init: PathNode<T> = { point: initial, previous: null, cost: 0 }
   const nodes = new Map<T, PathNode<T>>()
