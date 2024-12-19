@@ -1,4 +1,4 @@
-import { result, sum } from '../../shared/utils'
+import { memoize, result, sum } from '../../shared/utils'
 
 export const solver: Solver = (inputStr) => {
   const [patternStr, designsStr] = inputStr.split('\n\n')
@@ -39,19 +39,4 @@ export const solver: Solver = (inputStr) => {
   })
 
   result(2, sum(...possibleDesigns.map(getPossibleDesigns)))
-}
-
-function memoize<Params extends any[], Output>(fn: (...args: Params) => Output) {
-  const cache = {}
-  return function (...args: Params): Output {
-    const stringifiedArgs = JSON.stringify(args)
-    if (cache[stringifiedArgs]) {
-      return cache[stringifiedArgs]
-    }
-
-    const result = fn(...args)
-    cache[stringifiedArgs] = result
-
-    return result
-  }
 }

@@ -333,3 +333,18 @@ export let isExample = false
 export function setExample() {
   isExample = true
 }
+
+export function memoize<Params extends any[], Output extends any>(fn: (...args: Params) => Output) {
+  const cache = {}
+  return function (...args: Params): Output {
+    const stringifiedArgs = JSON.stringify(args)
+    if (cache[stringifiedArgs]) {
+      return cache[stringifiedArgs]
+    }
+
+    const result = fn(...args)
+    cache[stringifiedArgs] = result
+
+    return result
+  }
+}
