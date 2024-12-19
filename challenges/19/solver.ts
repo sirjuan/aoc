@@ -2,13 +2,12 @@ import { memoize, result, sum } from '../../shared/utils'
 
 export const solver: Solver = (inputStr) => {
   const [patternStr, designsStr] = inputStr.split('\n\n')
-  const availablePatterns = patternStr.split(', ')
-  const desiredDesigns = designsStr.split('\n')
+  const patterns = patternStr.split(', ')
 
   const possibleDesigns = []
 
-  for (const design of desiredDesigns) {
-    const queue = availablePatterns.filter((pattern) => design.startsWith(pattern)).map((pattern) => [pattern, design])
+  for (const design of designsStr.split('\n')) {
+    const queue = patterns.filter((p) => design.startsWith(p)).map((pattern) => [pattern, design])
 
     while (queue.length > 0) {
       const [pattern, des] = queue.pop()
@@ -20,9 +19,7 @@ export const solver: Solver = (inputStr) => {
         break
       }
 
-      for (const newPattern of availablePatterns.filter((pattern) => newDesign.startsWith(pattern))) {
-        queue.push([newPattern, newDesign])
-      }
+      queue.push(...patterns.filter((p) => newDesign.startsWith(p)).map((p) => [p, newDesign]))
     }
   }
 
@@ -33,7 +30,7 @@ export const solver: Solver = (inputStr) => {
       return 1
     }
 
-    return availablePatterns
+    return patterns
       .filter((pattern) => design.startsWith(pattern))
       .reduce((acc, pattern) => acc + getPossibleDesigns(design.replace(pattern, '')), 0)
   })
