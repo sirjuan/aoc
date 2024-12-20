@@ -1,12 +1,12 @@
 import { PathNode, shortestPath } from '../../shared/shortestPath'
-import { parseMap, parseNumber, result, isExample, memoize } from '../../shared/utils'
+import { parseMap, parseNumber, result, isExample } from '../../shared/utils'
 
 export const solver2: Solver = (inputStr) => {
   result(1, solve(inputStr, 2, isExample ? 1 : 100))
   result(2, solve(inputStr, 20, isExample ? 50 : 100))
 }
 
-export function solve(inputStr: string, cheatDuration: number, threshold: number) {
+function solve(inputStr: string, cheatDuration: number, threshold: number) {
   const walls = new Set<string>()
   const startCoord: Coord = [0, 0]
   let endPoint = ''
@@ -28,8 +28,15 @@ export function solve(inputStr: string, cheatDuration: number, threshold: number
   const isOutOfBounds = ([x, y]: Coord) => x <= 0 || y <= 0 || x >= map.width - 1 || y >= map.height - 1
 
   const pathWithoutCheats = findShortestPath({ startCoord, endPoint, walls })
-  const record: Record<string, number> = {}
   const traveledPoints = getPath(pathWithoutCheats)
+
+  let result = 0
+
+  const indices: Record<string, number> = {}
+
+  traveledPoints.forEach((point, index) => {
+    indices[point] = index
+  })
 
   traveledPoints.forEach((startPoint, index) => {
     const startCoord = parseCoords(startPoint)
@@ -49,22 +56,16 @@ export function solve(inputStr: string, cheatDuration: number, threshold: number
           continue
         }
 
-        const cheatKey = [startPoint, cheatPoint].sort((a, b) => a.localeCompare(b)).join('|')
-
-        if (record[cheatKey] != null) {
-          continue
-        }
-
-        const pointIndex = traveledPoints.indexOf(cheatPoint)
+        const pointIndex = indices[cheatPoint]
         const saved = pointIndex - distance - index
         if (saved >= threshold) {
-          record[cheatKey] = saved
+          result++
         }
       }
     }
   })
 
-  return Object.keys(record).length
+  return result
 }
 
 type Coord = [number, number]
