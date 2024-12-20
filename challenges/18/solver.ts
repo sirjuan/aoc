@@ -1,4 +1,4 @@
-import { PriorityQueue } from '../../shared/queue'
+import { shortestPath } from '../../shared/shortestPath'
 import { isExample, parseNumber, result } from '../../shared/utils'
 
 const mapWidth = isExample ? 6 : 70
@@ -66,58 +66,6 @@ function parseCoord(str: string): Coord {
 
 function addCoords([x1, y1]: Coord, [x2, y2]: Coord): Coord {
   return [x1 + x2, y1 + y2]
-}
-
-interface PathNode<T> {
-  point: T
-  previous: PathNode<T> | null
-  cost: number
-}
-
-export function shortestPath<T>({
-  initial,
-  isTarget,
-  edges,
-}: {
-  initial: T
-  isTarget: (node: PathNode<T>) => boolean
-  edges: (node: PathNode<T>) => [T, number][]
-}): PathNode<T>[] {
-  const init: PathNode<T> = { point: initial, previous: null, cost: 0 }
-  const nodes = new Map<T, PathNode<T>>()
-  nodes.set(initial, init)
-  const queue = new PriorityQueue({ initial: [init], comparator: (a, b) => 1 })
-  const targets = new Set<PathNode<T>>()
-  let target = Infinity
-
-  main: while (!queue.isEmpty()) {
-    const current = queue.pop()
-
-    for (const [point, cost] of edges(current)) {
-      const newCost = current.cost + cost
-      const newNode: PathNode<T> = { point, previous: current, cost: newCost }
-
-      if (isTarget(newNode)) {
-        if (newCost > target) {
-          break main
-        }
-        targets.add(newNode)
-        nodes.set(point, newNode)
-        if (newCost < target) {
-          target = newCost
-        }
-      }
-
-      const existing = nodes.get(point)
-
-      if (!existing || newCost < existing.cost) {
-        nodes.set(point, newNode)
-        queue.push(newNode)
-      }
-    }
-  }
-
-  return [...targets].filter((node) => node.cost <= target).sort((a, b) => a.cost - b.cost)
 }
 
 function inBounds([x, y]: Coord): boolean {

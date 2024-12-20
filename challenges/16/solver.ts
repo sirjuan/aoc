@@ -1,4 +1,5 @@
-import { shortestPath } from '../../shared/shortestPath'
+import { PriorityQueue } from '../../shared/queue'
+import { PathNode } from '../../shared/shortestPath'
 import { parseMap, parseNumber, result } from '../../shared/utils'
 
 type Direction = 'N' | 'E' | 'S' | 'W'
@@ -54,7 +55,7 @@ export const solver: Solver = (inputStr) => {
     }
   }
 
-  result(1, targets[0].distance)
+  result(1, targets[0].cost)
   result(2, points.size)
 }
 
@@ -97,4 +98,57 @@ function stringify(coord: Coord, direction?: Direction): string {
 function parse(node: string): [Coord, Direction] {
   const [pos, dir] = node.split('-')
   return [pos.split(',').map(parseNumber) as Coord, dir as Direction]
+}
+
+function shortestPath<T>({
+  initial,
+  isTarget,
+  edges,
+  multiple = false,
+}: {
+  initial: T
+  isTarget: (node: T) => boolean
+  edges: (node: T) => [T, number][]
+  multiple?: boolean
+}): PathNode<T>[] {
+  const init: PathNode<T> = { point: initial, previous: null, cost: 0 }
+  const nodes = new Map<T, PathNode<T>>()
+  nodes.set(initial, init)
+  const queue = new PriorityQueue({ initial: [init], comparator: (a, b) => a.cost - b.cost })
+  const targets = new Set<PathNode<T>>()
+  let target = Infinity
+
+  main: while (!queue.isEmpty()) {
+    const current = queue.pop()
+
+    for (const [point, distance] of edges(current.point)) {
+      const newDistance = current.cost + distance
+
+      if (newDistance > target) {
+        continue
+      }
+
+      const newNode: PathNode<T> = { point, previous: current, cost: newDistance }
+      if (isTarget(point)) {
+        if (newDistance > target) {
+          break main
+        }
+        targets.add(newNode)
+        if (!multiple) {
+          break main
+        }
+        nodes.set(point, newNode)
+        target = newDistance
+      }
+
+      const existing = nodes.get(point)
+
+      if (!existing || newDistance <= existing.cost) {
+        nodes.set(point, newNode)
+        queue.push(newNode)
+      }
+    }
+  }
+
+  return [...targets].filter((node) => node.cost === target)
 }

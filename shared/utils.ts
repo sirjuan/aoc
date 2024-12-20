@@ -348,3 +348,27 @@ export function memoize<Params extends any[], Output extends any>(fn: (...args: 
     return result
   }
 }
+
+/* eslint-disable no-restricted-syntax */
+export function groupBy<
+  TData,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  TKey extends keyof TData
+>(array: TData[], selector: (obj: TData) => string): Record<string, TData[]>
+
+export function groupBy<TData, TKey extends keyof TData>(array: TData[], selector: TKey): Record<string, TData[]>
+
+export function groupBy<TData, TKey extends keyof TData>(array: TData[], selector: TKey | ((obj: TData) => TKey)) {
+  const result: Record<string, TData[]> = {}
+
+  for (const item of array) {
+    const key = (typeof selector === 'function' ? selector(item) : item[selector]) as string
+
+    if (result[key] == null) {
+      result[key] = []
+    }
+    result[key]?.push(item)
+  }
+
+  return result
+}

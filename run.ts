@@ -13,7 +13,7 @@ async function run() {
   const currentYear = new Date().getFullYear()
   const year = args.year == null ? currentYear : args.year
   const day = args.day == null ? new Date().getDate() : args.day
-  const command = args._[0]
+  const command = typeof args._[0] === 'string' ? args._[0] : ''
 
   const yearPart = year === currentYear ? 'challenges' : year.toString()
   const dir = relativePath(yearPart, day.toString())

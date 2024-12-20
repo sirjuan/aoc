@@ -1,62 +1,58 @@
 import { PriorityQueue } from './queue'
 
-interface PathNode<T> {
+export interface PathNode<T> {
   point: T
   previous: PathNode<T> | null
-  distance: number
+  cost: number
 }
 
 export function shortestPath<T>({
   initial,
   isTarget,
   edges,
-  multiple = false,
+  target: initialTarget = Infinity,
 }: {
   initial: T
-  isTarget: (node: T) => boolean
-  edges: (node: T) => [T, number][]
-  multiple?: boolean
+  isTarget: (node: PathNode<T>) => boolean
+  edges: (node: PathNode<T>) => [T, number][]
+  target?: number
 }): PathNode<T>[] {
-  const init: PathNode<T> = { point: initial, previous: null, distance: 0 }
+  const init: PathNode<T> = { point: initial, previous: null, cost: 0 }
   const nodes = new Map<T, PathNode<T>>()
   nodes.set(initial, init)
-  const queue = new PriorityQueue({ initial: [init], comparator: (a, b) => a.distance - b.distance })
+  const queue = new PriorityQueue({ initial: [init], comparator: (a, b) => a.cost - b.cost })
   const targets = new Set<PathNode<T>>()
-  let target = Infinity
+  let target = initialTarget
 
   main: while (!queue.isEmpty()) {
     const current = queue.pop()
 
-    for (const [point, distance] of edges(current.point)) {
-      const newDistance = current.distance + distance
-
-      if (newDistance > target) {
+    for (const [point, distance] of edges(current)) {
+      const newCost = current.cost + distance
+      if (newCost > target) {
         continue
       }
+      const newNode: PathNode<T> = { point, previous: current, cost: newCost }
 
-      const newNode: PathNode<T> = { point, previous: current, distance: newDistance }
-      if (isTarget(point)) {
-        if (newDistance > target) {
-          break main
+      if (isTarget(newNode)) {
+        if (newCost > target) {
+          continue
         }
         targets.add(newNode)
-        if (!multiple) {
-          break main
-        }
         nodes.set(point, newNode)
-        target = newDistance
+        if (newCost < target) {
+          target = newCost
+        }
       }
 
       const existing = nodes.get(point)
 
-      if (!existing || newDistance <= existing.distance) {
+      if (!existing || newCost <= existing.cost) {
         nodes.set(point, newNode)
         queue.push(newNode)
       }
     }
   }
 
-  console.log('target', target)
-
-  return [...targets].filter((node) => node.distance === target)
+  return [...targets].filter((node) => node.cost <= target).sort((a, b) => a.cost - b.cost)
 }
