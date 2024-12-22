@@ -5,18 +5,18 @@ export const solver1: Solver = (inputStr) => {
 }
 
 export const solver2: Solver = (inputStr) => {
-  const secretNumberLists = splitLines(inputStr)
-    .map(parseNumber)
-    .map((secretNumber) => calculateSecretNumbersList(secretNumber, 2000))
-
   const sequencePrices: Record<string, number> = {}
 
-  secretNumberLists.forEach((secretNumbers) => {
+  splitLines(inputStr).forEach((snStr) => {
     const processed = new Set<string>()
     let changes: number[] = []
+    let sn = parseNumber(snStr)
     let lastPrice = 0
 
-    secretNumbers.forEach((sn) => {
+    for (let i = 0; i < 2000; i++) {
+      if (i > 0) {
+        sn = calculateSecretNumber(sn)
+      }
       const price = sn % 10
       changes.push(price - lastPrice)
       lastPrice = price
@@ -30,7 +30,7 @@ export const solver2: Solver = (inputStr) => {
           sequencePrices[key] += price
         }
       }
-    })
+    }
   })
 
   result(2, Math.max(...Object.values(sequencePrices)))
@@ -43,15 +43,7 @@ function calculateSecretNumbers(sn: number, count: number) {
   return sn
 }
 
-function calculateSecretNumbersList(sn: number, count: number) {
-  const results = [sn]
-  for (let i = 0; i < count; i++) {
-    results.push(calculateSecretNumber(results.at(-1)))
-  }
-  return results
-}
-
-const calculateSecretNumber = (sn: number) => {
+function calculateSecretNumber(sn: number) {
   sn ^= sn * 64
   sn = sn >>> 0
   sn = sn % 16777216
