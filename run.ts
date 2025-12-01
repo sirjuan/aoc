@@ -15,7 +15,7 @@ async function run() {
   const day = args.day == null ? new Date().getDate() : args.day
   const command = typeof args._[0] === 'string' ? args._[0] : ''
 
-  const yearPart = year === currentYear ? 'challenges' : year.toString()
+  const yearPart = year.toString()
   const dir = relativePath(yearPart, day.toString())
   if (!fs.existsSync(dir)) {
     copyTemplate(dir, await fetchInput(day, year))
