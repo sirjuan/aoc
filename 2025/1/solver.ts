@@ -49,3 +49,23 @@ export const solver2: Solver = (inputStr) => {
 
   result(2, part2)
 }
+
+// Alternative solution using sign normalization trick
+// NOTE: Not mine!
+export const solver2Alt: Solver = (inputStr) => {
+  let curr = 50
+  let zeros = 0
+
+  for (const line of inputStr.split('\n')) {
+    const sign = line[0] === 'L' ? -1 : 1
+    const diff = sign * parseInt(line.slice(1), 10)
+
+    let newPos = curr + diff
+    newPos *= sign
+    curr *= sign
+    zeros += Math.floor(newPos / 100) - Math.floor(curr / 100)
+    curr = (sign * newPos) % 100
+  }
+
+  result(2, zeros)
+}
