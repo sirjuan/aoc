@@ -299,6 +299,88 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     }
   }
 
+  interface Neighbors {
+    S: T | undefined
+    N: T | undefined
+    E: T | undefined
+    W: T | undefined
+  }
+
+  function getNeighbors([x, y]: [x: number, y: number]): Neighbors {
+    const deltas = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ]
+    const neighbors: Neighbors = {
+      S: getItem([x, y + 1]),
+      N: getItem([x, y - 1]),
+      E: getItem([x + 1, y]),
+      W: getItem([x - 1, y]),
+    }
+
+    return neighbors
+  }
+
+  function getNeighborCount([x, y]: [x: number, y: number], condition: (item: T | undefined) => boolean): number {
+    const neighbors = getNeighbors([x, y])
+    let count = 0
+    for (const direction of Object.keys(neighbors) as (keyof Neighbors)[]) {
+      if (condition(neighbors[direction])) {
+        count++
+      }
+    }
+    return count
+  }
+
+  interface AllNeighbors {
+    NW: T | undefined
+    N: T | undefined
+    NE: T | undefined
+    W: T | undefined
+    E: T | undefined
+    SW: T | undefined
+    S: T | undefined
+    SE: T | undefined
+  }
+
+  function getAllNeighbors([x, y]: [x: number, y: number]): AllNeighbors {
+    const neighbors: AllNeighbors = {
+      NW: getItem([x - 1, y - 1]),
+      N: getItem([x, y - 1]),
+      NE: getItem([x + 1, y - 1]),
+      W: getItem([x - 1, y]),
+      E: getItem([x + 1, y]),
+      SW: getItem([x - 1, y + 1]),
+      S: getItem([x, y + 1]),
+      SE: getItem([x + 1, y + 1]),
+    }
+
+    return neighbors
+  }
+
+  function getAllNeighborsCount([x, y]: [x: number, y: number], condition: (item: T | undefined) => boolean): number {
+    const neighbors = getAllNeighbors([x, y])
+    let count = 0
+    for (const direction of Object.keys(neighbors) as (keyof AllNeighbors)[]) {
+      if (condition(neighbors[direction])) {
+        count++
+      }
+    }
+    return count
+  }
+
+  function print() {
+    for (let y = 0; y < height; y++) {
+      let line = ''
+      for (let x = 0; x < width; x++) {
+        line += getItem([x, y])
+      }
+      console.log(line)
+    }
+  }
+
   return {
     ...mapUtils,
     horizontalLines,
@@ -313,6 +395,11 @@ export function parseMap<T = string>(inputStr: string, { iterator, parser = (cha
     getLine,
     height,
     width,
+    getNeighbors,
+    getNeighborCount,
+    getAllNeighbors,
+    getAllNeighborsCount,
+    print,
   }
 }
 
@@ -370,5 +457,13 @@ export function groupBy<TData, TKey extends keyof TData>(array: TData[], selecto
     result[key]?.push(item)
   }
 
+  return result
+}
+
+export function range(start: number, end: number): number[] {
+  const result = []
+  for (let i = start; i <= end; i++) {
+    result.push(i)
+  }
   return result
 }

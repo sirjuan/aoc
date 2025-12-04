@@ -67,8 +67,10 @@ async function fetchInput(day: number, year: number) {
     throw new Error('Missing session')
   }
   const cookie = `session=${session}`
-  const url = `https://adventofcode.com/${year}/day/${day}/input`
+  const urlBase = `https://adventofcode.com/${year}/day/${day}`
+  const url = `${urlBase}/input`
   const response = await fetch(url, { headers: { cookie } })
+  console.log(`Fetching input from ${urlBase}`)
   return response.text()
 }
 
