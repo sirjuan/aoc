@@ -467,3 +467,15 @@ export function range(start: number, end: number): number[] {
   }
   return result
 }
+
+export function merge(ranges: [number, number][]) {
+  var result: [number, number][] = []
+  let last: [number, number] | null = null
+
+  ranges.forEach(function (r) {
+    if (!last || r[0] > last[1]) result.push((last = r))
+    else if (r[1] > last[1]) last[1] = r[1]
+  })
+
+  return result
+}
