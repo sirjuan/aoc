@@ -62,7 +62,7 @@ async function copyTemplate(dir: string, data: string) {
 }
 
 async function fetchInput(day: number, year: number) {
-  const session = process.env.SESSION
+  const session = process.env.SESSION_TOKEN
   if (!session) {
     throw new Error('Missing session')
   }
