@@ -30,8 +30,6 @@ export const solver1: Solver = (inputStr) => {
 }
 
 export const solver2: Solver = (inputStr) => {
-  let part2 = 1
-
   const lines = splitLines(inputStr).map(splitChars)
 
   const start = lines[0].indexOf('S')
@@ -45,12 +43,16 @@ export const solver2: Solver = (inputStr) => {
 
     Object.entries(previousStates).forEach(([xStr, count]) => {
       const x = Number(xStr)
-      if (line[x] === '^') {
-        currentStates[x - 1] = (currentStates[x - 1] || 0) + count
-        currentStates[x + 1] = (currentStates[x + 1] || 0) + count
-        part2++
-      } else {
+
+      const visit = (x: number) => {
         currentStates[x] = (currentStates[x] || 0) + count
+      }
+
+      if (line[x] === '^') {
+        visit(x - 1)
+        visit(x + 1)
+      } else {
+        visit(x)
       }
     })
 
